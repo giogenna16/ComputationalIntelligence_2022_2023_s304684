@@ -89,3 +89,29 @@ nodes1= 27
 ## Cooperations
 I tried to develop ideas and possible solutions with Paolo Drago Leon, Diego Gasco, Enrico Magliano and Amine Hamdi, students of the course.
 I developed the first two algorithms alone and the third with the big help of the code of the professor Giovanni Squillero, ad mentioned above.
+
+
+# Algorithms Changes 
+
+After received peer reviews, I decided to follow some advices, so I changed my code to try to improve the performances. 
+
+In particular, I modified the Depth First Algorithm with heuristics: the logic is the same, but I apported some optimizations on the code to make it faster and to visit less nodes.
+
+Moreover, I modified the A* Algorithm and particularly the heuristic, that now should be better than the previous one. The heuristics consists in  calculating the estimated cost as the number of repetitions minus the number of new elements of list to add, w.r.t. the numbers already selected so far. E.g., if N=5 and I already selected [0, 1, 3], the estimated cost of the list [0, 2] is repetitions(= 1) - new elements(= 1) = 0 and the estimated cost of the list [1, 0] is repetitions(= 2) - new elements(= 0) = 2.
+
+In the table below, the new results are listed below (if the results are ***computed in more than 5 minutes***, they are not presented):
+
+| N            | Greedy Algorithm     |Depth First Algorithm with heuristics | A* Algorithm|
+|--------------|-----------|------------|------------|
+| 5            |  w= 5, nodes=5        | w=5, nodes=13         |    w=5, nodes=32        |      
+| 10           |  w= 15, nodes=13         | w=12, nodes=488      |     w=10, nodes=775       |
+| 15           | w=24, nodes=17    |   w=20, nodes=528      |          w=17, nodes=9856    |
+| 20           |  w=37, nodes=14  |     w=33, nodes=350    |       w=23, nodes=15853      |
+| 50           |   w=147, nodes=23 |    w=101, nodes=2865      |            |
+| 100          |   w=314, nodes=21  |    w=268, nodes=7542   |            |
+| 200          |  w=677, nodes=26 |    w=585, nodes=14586    |            |
+| 500          |  w=2436, nodes=28  |  w=1801, nodes=34651      |            |
+| 1000         | w=4652, nodes=33  |      |            |
+| 2000         | w=12169, nodes=38  |      |            |
+| 5000         | w=35246, nodes=56  |      |            |
+|10000         | w=73991, nodes=44  |      |            |

@@ -1,4 +1,6 @@
-import logging
+from copy import deepcopy
+from itertools import accumulate
+from operator import xor
 import random 
 from collections import namedtuple
 
@@ -51,8 +53,8 @@ def nim_sum(nim: Nim):
                 for e in with_removal:
                     res^= e 
                 if res == 0: # the bitwise xor is equal to zero
-                    nim.nimming(Nimply(row_number, j))
-                    return
+                    return Nimply(row_number, j)
+                    
     else:
         # if it has arrived here, it means that there are not NIM_SUM solution (the NIM_SUM is already 0): the agent 
         # will remove a random number of object from a random row
@@ -62,12 +64,66 @@ def nim_sum(nim: Nim):
         else:
             to_remove= 1
         row_number= temp.index(selected)
-        nim.nimming(Nimply(row_number, to_remove))
+        return Nimply(row_number, to_remove)
+
+#------------------------------------------------------------------------------#
+def nim_sum(state: Nim) -> int:
+    *_, result = accumulate(state.rows, xor)
+    return result
+
+
+def cook_status(state: Nim) -> dict:
+    cooked = dict()
+    cooked["possible_moves"] = [
+        (r, o) for r, c in enumerate(state.rows) for o in range(1, c + 1) if state.k is None or o <= state.k
+    ]
+    cooked["active_rows_number"] = sum(o > 0 for o in state.rows)
+    cooked["shortest_row"] = min((x for x in enumerate(state.rows) if x[1] > 0), key=lambda y: y[1])[0]
+    cooked["longest_row"] = max((x for x in enumerate(state.rows)), key=lambda y: y[1])[0]
+    cooked["nim_sum"] = nim_sum(state)
+
+    brute_force = list()
+    for m in cooked["possible_moves"]:
+        tmp = deepcopy(state)
+        tmp.nimming(m)
+        brute_force.append((m, nim_sum(tmp)))
+    cooked["brute_force"] = brute_force
+
+    return cooked
+
+# function in which the ply are chosen on the basis of the values of the genes of the genome
+def my_evolved_hard_coded(state: Nim, genome) -> Nimply:
+    data= cook_status(state)
+    if(data["active_rows_number"]>=genome[0]):
+        if(state.rows[data["longest_row"]]>1):
+            return Nimply(data["longest_row"], int(state.rows[data["longest_row"]]/2))
+        else:
+            return Nimply(data["longest_row"], 1)
+    elif(data["active_rows_number"]==genome[1] and state.rows[data["longest_row"]]>genome[3]):
+        if(state.rows[data["longest_row"]]>1):
+            return Nimply(data["longest_row"], state.rows[data["longest_row"]]-1)
+        else:
+            return Nimply(data["longest_row"], 1)
+    elif(data["active_rows_number"]==genome[1] and state.rows[data["longest_row"]]<=genome[3]):
+        return Nimply(data["longest_row"], 1)
+    elif(data["active_rows_number"]==genome[2]):
+        return Nimply(data["shortest_row"], state.rows[data["shortest_row"]])
+    elif(data["active_rows_number"]==genome[4]):
+        if(state.rows[data["shortest_row"]]>1):
+            return Nimply(data["shortest_row"], state.rows[data["shortest_row"]]-1)
+        else:
+            return Nimply(data["shortest_row"], 1)
+    else:
+        return Nimply(data["longest_row"], 1)
+
 
 #------------------------------------------------------------------------------#
 
 # YOU vs THE AGENT
-N= 5
+N= 8
+genome= list((5, 2, 1, 4, 3)) # This parameters are the result of a generation of lab3_2, FOR NIM_SIZE=8!!!
+                              # So, if you change the NIM_SIZE, this parameters are no longer good:
+                              # You have to generate new parameters for the NIM_SIZE selected
 x= Nim(N)
 r= random.random()
 if r > 0.5:
@@ -98,7 +154,9 @@ while(x):
         rounds_number+=1
         p1_turn= False
     else:
-        nim_sum(x)
+        ply= my_evolved_hard_coded(x, genome)
+        #ply= nim_sum(x)
+        x.nimming(ply)
         print("After p2 move", x._rows, "\n")
         rounds_number+=1
         p1_turn= True

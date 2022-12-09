@@ -15,3 +15,17 @@ useless because doing one match in which one starts first and another in which t
 the hard coded used are not randomic).
 
 Thus, I added four more hardcoded rules to those defined during lectures: *giovanni*, *reverse_gabriele*, *my_very_silly* and *my_smart*.
+
+### Task 3.3
+For the third task, I implemented an agent using MinMax (without and with Alpha-Beta pruning). The agent wins against the random agent and is on par with the optimal agent: the MinMax Agent is optimal.
+
+Using the Alpha-Beta pruning slightly increases the performance in terms of speed, but already for NIM_SIZE=4 the computational time is very long.
+
+### Task 3.4
+For the fourth task, I implemented a Reinforcement Learning Agent which learns only when it wins against the opponent (I chose a random Agent). 
+
+
+As mentioned, I decided to have it learn only from the moves that lead it to be the winner and not from the moves that lead him to lose.
+
+
+As the matches played increase, the performances (number of won matches) increase, but it does not converge to the optimal strategy (It does not win all the matches)

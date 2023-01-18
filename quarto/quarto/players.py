@@ -165,16 +165,13 @@ class HardCodedPlayer2(Player):
 
 #-------------------------------------------------------------------------------------------------------#
 
-class RenforcementLearningAgent(object):
+class RenforcementLearningAgent(Player):
     def __init__(self, quarto: Quarto, alpha=0.15, random_factor=0.2) -> None:# 80% explore, 20% exploit
-        self.quarto = quarto
+        super().__init__(quarto)
         self.state_history = []  # state, reward
         self.alpha = alpha
         self.random_factor = random_factor
-        self.G = {(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1) : 0} # the first status
-       
-    def get_game(self):
-        return self.quarto
+        self.G = {}#(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1) : 0} # the first state
 
     def choose_piece(self)->  int:
         game= self.get_game()
@@ -211,14 +208,9 @@ class RenforcementLearningAgent(object):
                             for r in range(tmp.BOARD_SIDE):
                                 tmp_board_t+= tmp_board[r].tolist()
                             tmp_board_t= tuple(tmp_board_t)
-                            temp= None
-                            if tmp_board_t not in self.G:
-                                temp= 0
-                                #self.G[tmp_board_t] = 0 #initialization
-                            if temp== 0:
-                                average_reward+= temp
-                            else:     
-                                average_reward+= self.G[tmp_board_t]
+                            is_in, state_in_G= state_or_equivalent_in_G(tmp_board_t, self.G)
+                            if is_in:     
+                                average_reward+= self.G[state_in_G]
                 # select the piece with the minimum average point, because it will be the piece for the opponent
                 if average_reward<= minG:
                     minG= average_reward
@@ -249,17 +241,14 @@ class RenforcementLearningAgent(object):
                 for r in range(tmp.BOARD_SIDE):
                     tmp_board_t+= tmp_board[r].tolist()
                 tmp_board_t= tuple(tmp_board_t)
-                temp= None
-                if tmp_board_t not in self.G:
-                    temp= 0
-                    #self.G[tmp_board_t] = 0 #initialization
-                if temp== 0:
-                    if temp>= maxG:
-                        maxG= temp
+                is_in, state_in_G= state_or_equivalent_in_G(tmp_board_t, self.G)
+                if not is_in:
+                    if maxG<= 0:
+                        maxG= 0
                         chosen_position= (board_pos[1], board_pos[0])
                 else:
-                    if self.G[tmp_board_t]>= maxG:
-                        maxG= self.G[tmp_board_t]
+                    if self.G[state_in_G]>= maxG:
+                        maxG= self.G[state_in_G]
                         chosen_position= (board_pos[1], board_pos[0])
         
         # inizialize the reward of the status with the chosen position
@@ -270,19 +259,24 @@ class RenforcementLearningAgent(object):
         for r in range(tmp.BOARD_SIDE):
             tmp_board_t+= tmp_board[r].tolist()
         tmp_board_t= tuple(tmp_board_t)
-        if tmp_board_t not in self.G:
-            self.G[tmp_board_t] = 0 
+        is_in, state_in_G= state_or_equivalent_in_G(tmp_board_t, self.G)
         reward= self.get_reward() 
-        self.update_state_history(tmp_board_t, reward)
-
+        if not is_in:
+            self.G[tmp_board_t]= 0 
+            self.update_state_history(tmp_board_t, reward)
+        else:
+            self.update_state_history(state_in_G, reward)
+        
         return chosen_position
 
-    def get_reward(self, winner= None):
-        if winner != None: 
-            if winner:
-                return 1 # if the agent won
+    def get_reward(self, won= None):
+        if won!= None: 
+            if won== 1:
+                return 3 # if the agent won
+            elif won== 0:
+                return -3 # if the agent lost  
             else:
-                return -1 # if the agent lost       
+                return 1  # on par    
         else:
             return 0 # if it is not the end of the match
 
@@ -290,6 +284,7 @@ class RenforcementLearningAgent(object):
         self.state_history.append((state, reward))
 
     def learn(self):
+        print("len of G= ", len(self.G))
         target = 0
         for prev, reward in reversed(self.state_history):
             self.G[prev] = self.G[prev] + self.alpha * (target - self.G[prev])
@@ -439,4 +434,36 @@ def check_diagonal(game): # verify if there is a winning diagonal sequence for t
         return 1 # there is at least a sequence of one
     else:
         return 0
+
+def ninghty_degree_rotation(state: tuple):
+    # Rotation of 90 degrees
+    rotated_state= [0]*16 # a list of 16 zeros
+    dict_corr= {0: 12, 1: 8, 2: 4, 3: 0} # index matches for rotation
+    for i in range(16):
+        for j in range(4):
+            if i%4== j:
+                for k in range(4):
+                    if i//4== k:
+                        rotated_state[dict_corr[j]+k]= state[i]  
+    return tuple(rotated_state)
+
+def state_or_equivalent_in_G(state: tuple, G: dict):
+    # checks if the state or one of its rotations of 90, 180, 270 degrees 
+    # (which are equivalent to it) is present in G
+    ninghty_rotated_state= ninghty_degree_rotation(state)
+    onehundredeighty_rotated_state= ninghty_degree_rotation(ninghty_rotated_state)
+    twohundredseventy_rotated_state= ninghty_degree_rotation(onehundredeighty_rotated_state)
+    #return True if a state or one of its equivalents is in G, return also the state which is in G
+    if state in G:
+        return True, state
+    elif ninghty_rotated_state in G:
+        return True, ninghty_rotated_state
+    elif onehundredeighty_rotated_state in G:
+        return True, onehundredeighty_rotated_state
+    elif twohundredseventy_rotated_state in G:
+        return True, twohundredseventy_rotated_state
+    else:
+        return False, ()
+
+
     

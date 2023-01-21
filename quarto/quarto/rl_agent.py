@@ -1,6 +1,7 @@
 import random
 from quarto.objects import Player, Quarto
 from copy import deepcopy
+from quarto.utils import state_or_equivalent_in_G
 
 class RenforcementLearningAgent(Player):
     def __init__(self, quarto: Quarto, alpha=0.15, random_factor=0.2) -> None:# 80% explore, 20% exploit
@@ -157,38 +158,3 @@ class RenforcementLearningAgent(Player):
         self.state_history_opponent = []
         self.random_factor -= 10e-5  # decrease random factor each episode of play
 
-
-#-----------------------------------------------------------------------------------------------#
-
-def ninghty_degree_rotation(state: tuple):
-    # Rotation of 90 degrees
-    rotated_state= [0]*len(state) # a list of 16 zeros
-    dict_corr= {0: 12, 1: 8, 2: 4, 3: 0} # index matches for rotation
-    for i in range(len(state)):
-        for j in range(len(state)//4):
-            if i%4== j:
-                for k in range(len(state)//4):
-                    if i//4== k:
-                        rotated_state[dict_corr[j]+k]= state[i]  
-    return tuple(rotated_state)
-
-def state_or_equivalent_in_G(state: tuple, G: dict):
-    # checks if the state or one of its rotations of 90, 180, 270 degrees 
-    # (which are equivalent to it) is present in G
-    ninghty_rotated_state= ninghty_degree_rotation(state)
-    onehundredeighty_rotated_state= ninghty_degree_rotation(ninghty_rotated_state)
-    twohundredseventy_rotated_state= ninghty_degree_rotation(onehundredeighty_rotated_state)
-    #return True if a state or one of its equivalents is in G, return also the state which is in G
-    if state in G:
-        return True, state
-    elif ninghty_rotated_state in G:
-        return True, ninghty_rotated_state
-    elif onehundredeighty_rotated_state in G:
-        return True, onehundredeighty_rotated_state
-    elif twohundredseventy_rotated_state in G:
-        return True, twohundredseventy_rotated_state
-    else:
-        return False, ()
-
-
-    

@@ -5,8 +5,9 @@ import logging
 import argparse
 import random
 import quarto
-from quarto.HardCodedplayers import *
-from quarto.RLagent import *
+from quarto.hard_coded_players import *
+from quarto.rl_agent import *
+from quarto.genetic_algorithm import ganeration
 import matplotlib.pyplot as plt
 
 
@@ -37,29 +38,17 @@ def main_RL_agent():
         if m%2== 0:  # one time it starts first, another second
             game.set_players((robot, HardCodedPlayer0(game)))
             winner= game.run()
+            won=1 if winner==0 else 0 if winner==1 else -1
+            lost=0 if winner==0 else 1 if winner==1 else -1
             if winner== 0:
-                won= 1
-                lost= 0
                 count_won+= 1
-            elif winner== 1:
-                won= 0
-                lost= 1
-            else:
-                won= -1
-                lost= -1
         else:
             game.set_players((HardCodedPlayer0(game), robot))
             winner = game.run()
+            won== 1 if winner==1 else 0 if winner==0 else -1
+            lost== 0 if winner==1 else 1 if winner==0 else -1 
             if winner== 1:
-                won= 1
-                lost= 0
                 count_won+= 1
-            elif winner== 0:
-                won= 0
-                lost= 1
-            else:
-                won= -1
-                lost= -1
 
         #add the reward for the final state
         reward_won= robot.get_reward(won)
@@ -83,9 +72,6 @@ def main_RL_agent():
             winsHistory.append(count_won)
             indices.append(m)
             count_won= 0
-    #print(robot.G)
-    print(winsHistory)
-    print(sum(winsHistory))
     plt.plot(indices, winsHistory)
     plt.xlabel('Number of matches')
     plt.ylabel('Number of won matches for every 6 matches')
@@ -135,5 +121,8 @@ if __name__ == '__main__':
     elif args.verbose == 2:
         logging.getLogger().setLevel(level=logging.DEBUG)
 
-    main_RL_agent()
+    #main_RL_agent()
     #main_hard_coded_players()
+    ganeration()
+    
+    

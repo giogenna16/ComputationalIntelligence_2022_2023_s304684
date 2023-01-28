@@ -29,10 +29,6 @@ class RenforcementLearningAgent(Player):
             if i not in placed:
                 not_placed.append(i)
 
-        # if random.random() < self.random_factor:
-        #     # if random number below random factor, choose random action
-        #     chosen_piece= random.choice(not_placed)
-        # else: #if leave the comment, tab the following for
         for p in not_placed:
             average_reward= 0 # for each p, in not_placed, so among the allowed pieces, compute the "average_reward", i.e. the sum of all the rewards of the states created placing p in all the different free positions
             for j in range(game.BOARD_SIDE):

@@ -7,28 +7,17 @@ import random
 import quarto
 from quarto.hard_coded_players import *
 from quarto.rl_agent import *
-from quarto.genetic_algorithm import ganeration
+from quarto.min_max import *
 import matplotlib.pyplot as plt
 
+NUM_MATCHES= 50
 
-class RandomPlayer(quarto.Player):
-    """Random player"""
-
-    def __init__(self, quarto: quarto.Quarto) -> None:
-        super().__init__(quarto)
-
-    def choose_piece(self) -> int:
-        return random.randint(0, 15)
-
-    def place_piece(self) -> tuple[int, int]:
-        return random.randint(0, 3), random.randint(0, 3)
-
-NUM_MATCHES= 60
 
 def main_RL_agent():
     count_won= 0
     game = quarto.Quarto()
     robot= RenforcementLearningAgent(game)
+    opponent= HardCodedPlayer0(game)
     winsHistory= []
     indices= []
     for m in range(NUM_MATCHES):
@@ -36,14 +25,14 @@ def main_RL_agent():
         won= None
         lost= None
         if m%2== 0:  # one time it starts first, another second
-            game.set_players((robot, HardCodedPlayer0(game)))
+            game.set_players((robot, opponent))
             winner= game.run()
             won=1 if winner==0 else 0 if winner==1 else -1
             lost=0 if winner==0 else 1 if winner==1 else -1
             if winner== 0:
                 count_won+= 1
         else:
-            game.set_players((HardCodedPlayer0(game), robot))
+            game.set_players((opponent, robot))
             winner = game.run()
             won== 1 if winner==1 else 0 if winner==0 else -1
             lost== 0 if winner==1 else 1 if winner==0 else -1 
@@ -81,19 +70,21 @@ def main_RL_agent():
 
 def main_hard_coded_players():
     game = quarto.Quarto()
+    my_player= HardCodedPlayer0(game)
+    opponent= HardCodedPlayer3(game)
     won_matches=0
     tied_matches=0
     for m in range(NUM_MATCHES):
         game.reset()
         if m%2== 0:  # one time it starts first, another second
-            game.set_players((HardCodedPlayer2(game), RandomPlayer(game)))
+            game.set_players((my_player, opponent))
             winner= game.run()
             if winner== 0:
                 won_matches+= 1
             if winner== -1:
                 tied_matches+=1
         else:
-            game.set_players((RandomPlayer(game), HardCodedPlayer2(game)))
+            game.set_players((opponent, my_player))
             winner = game.run()
             if winner== 1:
                won_matches+= 1
@@ -101,7 +92,32 @@ def main_hard_coded_players():
                 tied_matches+=1
     print(f"The evaluated player won {won_matches} matches and tied {tied_matches} matches")
 
+def main_min_max():
+    game= quarto.Quarto()
+    my_player= MinMaxPlayer(game)
+    opponent= HardCodedPlayer1(game)
+    won_matches= 0
+    tied_matches= 0
+    for m in range(NUM_MATCHES):
+        game.reset()
+        if m%2== 0:
+            my_player.set_maximizing(False)
+            game.set_players((my_player, opponent))
+            winner= game.run()
+            if winner== 0:
+                won_matches+= 1
+            elif winner== -1:
+                tied_matches+= 1
+        else:
+            my_player.set_maximizing(True)
+            game.set_players((opponent, my_player))
+            winner= game.run()
+            if winner== 1:
+                won_matches+= 1
+            elif winner== -1:
+                tied_matches+= 1
 
+    print(f"The evaluated player won {won_matches} matches and tied {tied_matches} matches")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -123,6 +139,6 @@ if __name__ == '__main__':
 
     #main_RL_agent()
     #main_hard_coded_players()
-    ganeration()
+    main_min_max()
     
     

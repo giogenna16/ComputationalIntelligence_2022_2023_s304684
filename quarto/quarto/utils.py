@@ -171,5 +171,16 @@ def state_or_equivalent_in_G(state: tuple, G: dict):
     else:
         return False, ()
 
+#----------------------------------------------------------------------------------------------------#
 
+def is_in_diagonal(game, pos):
+    diagonal_pos= list()
+    for j in range(game.BOARD_SIDE):
+        for i in range(game.BOARD_SIDE):
+            if(j== i or j+i== game.BOARD_SIDE-1):
+                diagonal_pos.append((j,i))
+    if pos in diagonal_pos:
+        return True
+    else:
+        return False
 

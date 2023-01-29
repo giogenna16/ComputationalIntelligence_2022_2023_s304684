@@ -3,14 +3,13 @@
 
 import logging
 import argparse
-import random
 import quarto
 from quarto.hard_coded_players import *
 from quarto.rl_agent import *
-from quarto.min_max import *
+from quarto.min_max import * 
 import matplotlib.pyplot as plt
 
-NUM_MATCHES= 50
+NUM_MATCHES= 300
 
 
 def main_RL_agent():
@@ -71,7 +70,7 @@ def main_RL_agent():
 def main_hard_coded_players():
     game = quarto.Quarto()
     my_player= HardCodedPlayer0(game)
-    opponent= HardCodedPlayer3(game)
+    opponent= HardCodedPlayer2(game)
     won_matches=0
     tied_matches=0
     for m in range(NUM_MATCHES):
@@ -92,16 +91,17 @@ def main_hard_coded_players():
                 tied_matches+=1
     print(f"The evaluated player won {won_matches} matches and tied {tied_matches} matches")
 
+
 def main_min_max():
     game= quarto.Quarto()
-    my_player= MinMaxPlayer(game)
-    opponent= HardCodedPlayer1(game)
+    my_player= MinMaxPlayer(game) # IT IS THE PLAYER TO BE USED FOR THE TOURNAMENT!!!!!!!!!!!!!!
+    opponent= HardCodedPlayer2(game)
     won_matches= 0
     tied_matches= 0
     for m in range(NUM_MATCHES):
         game.reset()
         if m%2== 0:
-            my_player.set_maximizing(False)
+            my_player.set_maximizing(False) # if my_player is the first, it will minimize, during the min_max for placing the position
             game.set_players((my_player, opponent))
             winner= game.run()
             if winner== 0:
@@ -109,7 +109,7 @@ def main_min_max():
             elif winner== -1:
                 tied_matches+= 1
         else:
-            my_player.set_maximizing(True)
+            my_player.set_maximizing(True) # if my_player is the second, it will maximize, during the min_max for placing the position
             game.set_players((opponent, my_player))
             winner= game.run()
             if winner== 1:

@@ -1,7 +1,7 @@
 import random
 from quarto.objects import Player, Quarto
 from copy import deepcopy
-from quarto.utils import check_horizontal, check_vertical, check_diagonal, is_in_diagonal
+from quarto.utils import check_horizontal, check_vertical, check_diagonal
 
 
 class RandomPlayer(Player):
@@ -175,73 +175,5 @@ class HardCodedPlayer2(Player):
                         return (i, j) # "swapped" because of the functions place and placeable in objects.py"
         return (random.randint(0, 3), random.randint(0, 3))
 
-
 #-------------------------------------------------------------------------------------------------------#
 
-
-class HardCodedPlayer3(Player):
-    """Player 3 using some hard-coded rules"""
-    def __init__(self, quarto: Quarto) -> None:
-        super().__init__(quarto)
-
-    def choose_piece(self) -> int:
-        game= self.get_game()
-        board_status= game.get_board_status()
-        placed= []  # pieces already placed
-        not_placed= []  # pieces have not been placed yet
-        for j in range(game.BOARD_SIDE):
-            for i in range(game.BOARD_SIDE):
-                p= board_status[j, i]
-                if p!= -1: # occupied position
-                    placed.append(p)
-        for i in range(16):
-            if i not in placed:
-                not_placed.append(i)
-        element_count= dict() #the keys are the not placed yet pieces, the values are the counts, as as explained below
-        for p in not_placed:
-            count= 0 
-            for j in range(game.BOARD_SIDE):
-                for i in range(game.BOARD_SIDE):
-                    pos= board_status[j, i] # the value of the (j,i) position on the board
-                    if pos== -1: # free position
-                        tmp= deepcopy(game)
-                        tmp.select(p) # select an element from the not placed yet list
-                        tmp.place(i, j) # place the selected element in the (j, i) position; "swapped" because of the functions place and placeable in objects.py"
-                        if(check_horizontal(tmp)== 4 or check_vertical(tmp)== 4 or check_diagonal(tmp)== 4): 
-                            count-= 3
-                        elif(check_horizontal(tmp)== 3 or check_vertical(tmp)== 3 or check_diagonal(tmp)== 3):
-                            count+= 1
-            element_count[p]= count
-        # return the element with the maximum count
-        return max(element_count, key= lambda x: element_count[x])
-
-    def place_piece(self) -> tuple[int, int]: 
-        game= self.get_game()
-        board_status= game.get_board_status()
-        positions_to_avoid= [] # a list of position which creates a sequence of three, position to avoid since they give advantage to the apponet
-        for j in range(game.BOARD_SIDE):
-            for i in range(game.BOARD_SIDE):
-                p= board_status[j, i] # the value of the (j,i) position on the board
-                if p== -1: # free position
-                    tmp= deepcopy(game)
-                    tmp.place(i, j) # place the selected element in the (j, i) position; "swapped" because of the functions place and placeable in objects.py"
-                    if(check_horizontal(tmp)== 4 or check_vertical(tmp)== 4 or check_diagonal(tmp)== 4): 
-                        return (i, j)  # "swapped" because of the functions place and placeable in objects.py"
-                    elif(check_horizontal(tmp)== 3 or check_vertical(tmp)== 3 or check_diagonal(tmp)== 3): 
-                        positions_to_avoid.append((j, i))                                                    
-        for j in range(game.BOARD_SIDE):
-            for i in range(game.BOARD_SIDE):
-                p= board_status[j, i]
-                if p== -1 and ((j, i) not in positions_to_avoid) and not is_in_diagonal(game, (j, i)):
-                    return (i, j) 
-        for j in range(game.BOARD_SIDE):
-            for i in range(game.BOARD_SIDE):
-                p= board_status[j, i]
-                if p== -1 and ((j, i) not in positions_to_avoid):
-                    return (i, j) 
-        for j in range(game.BOARD_SIDE):
-            for i in range(game.BOARD_SIDE):
-                p= board_status[j, i]
-                if p== -1 and not is_in_diagonal(game, (j, i)):
-                    return (i, j) 
-        return (random.randint(0, 3), random.randint(0, 3))

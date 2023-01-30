@@ -71,8 +71,8 @@ class HardCodedPlayer0(Player):
                     tmp.place(i, j) # place the selected element in the (j, i) position; "swapped" because of the functions place and placeable in objects.py"
                     if(check_horizontal(tmp)== 4 or check_vertical(tmp)== 4 or check_diagonal(tmp)== 4): # check if placing the selected element in position (j, i) leads to win the match; if so, choose the (j,i) position
                         return (i, j)  # "swapped" because of the functions place and placeable in objects.py"
-                    elif(check_horizontal(tmp)== 3 or check_vertical(tmp)== 3 or check_diagonal(tmp)== 3): # check if placing the selected element in position (j, i) leads to create a sequence of three element; if 
-                        positions_to_avoid.append((j, i))                                                     # so, add (j, i) to the position to avoid because it creates a favorable situation for the opponent        
+                    elif(check_horizontal(tmp)== 3 or check_vertical(tmp)== 3 or check_diagonal(tmp)== 3): # check if placing the selected element in position (j, i) leads to create a sequence of three element; if so, add (j, i) to the position to avoid because it creates a favorable situation for the opponent        
+                        positions_to_avoid.append((j, i))                                                     
         if len(positions_to_avoid)== num_free: # all the possible positions are "to avoid", choose randomly
             return (random.randint(0, 3), random.randint(0, 3))
         else:

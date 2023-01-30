@@ -1,0 +1,1 @@
+## The Player to be used for the tournament is ***MinMaxPlayer*** (its class is in the file **min_max.py**). To be evaluated, it has to be used the function **main_min_max** (in the file **main.py**) because is foundamental to set a boolean variable according to if it is the Player 0 (it has to minimize) or it is the Player1 (it has to maximize).

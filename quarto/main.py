@@ -92,7 +92,7 @@ def main_hard_coded_players():
     print(f"The evaluated player won {won_matches} matches and tied {tied_matches} matches")
 
 
-def main_min_max():
+def main_min_max(): # IT IS THE FUNCTION FOR THE PLAYER TO BE USED FOR THE TOURNAMENT!!!!!!!!!!!!!!
     game= quarto.Quarto()
     my_player= MinMaxPlayer(game) # IT IS THE PLAYER TO BE USED FOR THE TOURNAMENT!!!!!!!!!!!!!!
     opponent= HardCodedPlayer2(game)
